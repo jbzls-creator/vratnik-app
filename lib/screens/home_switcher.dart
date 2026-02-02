@@ -15,14 +15,7 @@ class HomeSwitcher extends StatefulWidget {
 class _HomeSwitcherState extends State<HomeSwitcher> {
   static const String masterPin = '11223344';
 
-  // 👤 údaje hosťa – len formulár
-  String meno = '';
-  String auto = '';
-  String farba = '';
-  String spz = '';
-  String zaKym = '';
-
-  bool isMasterUI = false; // 👈 LEN UI PREPÍNAČ
+  bool isMasterUI = false;
 
   // ================== LOCK ==================
 
@@ -69,73 +62,12 @@ class _HomeSwitcherState extends State<HomeSwitcher> {
     );
   }
 
-  // ================== GUEST ==================
-
-  void _editGuestData() {
-    final menoCtrl = TextEditingController(text: meno);
-    final autoCtrl = TextEditingController(text: auto);
-    final farbaCtrl = TextEditingController(text: farba);
-    final spzCtrl = TextEditingController(text: spz);
-    final zaKymCtrl = TextEditingController(text: zaKym);
-
-    showDialog(
-      context: context,
-      barrierDismissible: false,
-      builder: (_) {
-        return AlertDialog(
-          title: const Text('Upraviť údaje'),
-          content: SingleChildScrollView(
-            child: Column(
-              children: [
-                TextField(controller: menoCtrl, decoration: const InputDecoration(labelText: 'Meno')),
-                TextField(controller: autoCtrl, decoration: const InputDecoration(labelText: 'Auto')),
-                TextField(controller: farbaCtrl, decoration: const InputDecoration(labelText: 'Farba')),
-                TextField(controller: spzCtrl, decoration: const InputDecoration(labelText: 'SPZ')),
-                TextField(controller: zaKymCtrl, decoration: const InputDecoration(labelText: 'Za kým idem')),
-              ],
-            ),
-          ),
-          actions: [
-            TextButton(
-              onPressed: () =>
-                  Navigator.of(context, rootNavigator: true).pop(),
-              child: const Text('Zrušiť'),
-            ),
-            ElevatedButton(
-              onPressed: () {
-                setState(() {
-                  meno = menoCtrl.text.trim();
-                  auto = autoCtrl.text.trim();
-                  farba = farbaCtrl.text.trim();
-                  spz = spzCtrl.text.trim();
-                  zaKym = zaKymCtrl.text.trim();
-                });
-                Navigator.of(context, rootNavigator: true).pop();
-              },
-              child: const Text('Uložiť'),
-            ),
-          ],
-        );
-      },
-    );
-  }
-
-  void _openRamp(VisitController controller) {
-    controller.updateGuest(
-      meno: meno,
-      auto: auto,
-      farba: farba,
-      spz: spz,
-      zaKym: zaKym,
-    );
-    controller.openRamp();
-  }
-
   // ================== UI ==================
 
   @override
   Widget build(BuildContext context) {
-    final controller = context.watch<VisitController>();
+    // controller tu zatiaľ len “držime nažive”
+    context.watch<VisitController>();
 
     return Scaffold(
       appBar: AppBar(
@@ -149,16 +81,7 @@ class _HomeSwitcherState extends State<HomeSwitcher> {
       ),
       body: isMasterUI
           ? const MasterScreen()
-          : GuestScreen(
-        controller: controller,
-        meno: meno,
-        auto: auto,
-        farba: farba,
-        spz: spz,
-        zaKym: zaKym,
-        onEditGuest: _editGuestData,
-        onOpenRamp: () => _openRamp(controller),
-      ),
+          : const GuestScreen(),
     );
   }
 }

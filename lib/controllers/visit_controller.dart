@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../models/visit.dart';
 
 class VisitController extends ChangeNotifier {
@@ -9,12 +10,17 @@ class VisitController extends ChangeNotifier {
   StreamSubscription<QuerySnapshot>? _masterSubscription;
   StreamSubscription<DocumentSnapshot>? _guestSubscription;
 
-  // 👤 hosť
+  // ================= GUEST DATA =================
+
   String meno = '';
   String auto = '';
   String farba = '';
   String spz = '';
   String zaKym = '';
+
+  bool _guestLoaded = false;
+
+  // ================= STATE =================
 
   Visit? activeVisit;
   String? activeVisitId;
@@ -24,7 +30,38 @@ class VisitController extends ChangeNotifier {
   // ================= INIT =================
 
   VisitController() {
+    _init();
+  }
+
+  Future<void> _init() async {
+    await _loadGuestFromStorage();
+    await loadHistoryFromFirestore();
     _listenForRequests();
+  }
+
+  // ================= LOCAL STORAGE =================
+
+  Future<void> _loadGuestFromStorage() async {
+    final prefs = await SharedPreferences.getInstance();
+
+    meno = prefs.getString('guest_meno') ?? '';
+    auto = prefs.getString('guest_auto') ?? '';
+    farba = prefs.getString('guest_farba') ?? '';
+    spz = prefs.getString('guest_spz') ?? '';
+    zaKym = prefs.getString('guest_zaKym') ?? '';
+
+    _guestLoaded = true;
+    notifyListeners();
+  }
+
+  Future<void> _saveGuestToStorage() async {
+    final prefs = await SharedPreferences.getInstance();
+
+    await prefs.setString('guest_meno', meno);
+    await prefs.setString('guest_auto', auto);
+    await prefs.setString('guest_farba', farba);
+    await prefs.setString('guest_spz', spz);
+    await prefs.setString('guest_zaKym', zaKym);
   }
 
   // ================= GUEST =================
@@ -36,15 +73,24 @@ class VisitController extends ChangeNotifier {
     required String spz,
     required String zaKym,
   }) {
+    if (activeVisitId != null) return;
+
     this.meno = meno;
     this.auto = auto;
     this.farba = farba;
     this.spz = spz;
     this.zaKym = zaKym;
+
+    _saveGuestToStorage();
+    notifyListeners();
   }
 
   bool get canOpenRamp =>
-      meno.isNotEmpty && auto.isNotEmpty && spz.isNotEmpty && activeVisitId == null;
+      _guestLoaded &&
+          meno.isNotEmpty &&
+          auto.isNotEmpty &&
+          spz.isNotEmpty &&
+          activeVisitId == null;
 
   Future<void> openRamp() async {
     if (!canOpenRamp) return;
@@ -56,8 +102,6 @@ class VisitController extends ChangeNotifier {
       'carPlate': spz,
       'zaKym': zaKym,
       'status': 'pending',
-
-      // 🔥 KRITICKÉ
       'createdAtClient': Timestamp.now(),
       'createdAt': FieldValue.serverTimestamp(),
     });
@@ -74,7 +118,6 @@ class VisitController extends ChangeNotifier {
 
     _listenForOwnRequest();
     _startTimeout();
-
     notifyListeners();
   }
 
@@ -138,7 +181,7 @@ class VisitController extends ChangeNotifier {
     _masterSubscription = _db
         .collection('requests')
         .where('status', isEqualTo: 'pending')
-        .orderBy('createdAtClient') // 🔥 FIX
+        .orderBy('createdAtClient')
         .limit(1)
         .snapshots()
         .listen((snapshot) {
@@ -159,12 +202,43 @@ class VisitController extends ChangeNotifier {
         farba: data['farba'] ?? '',
         spz: data['carPlate'] ?? '',
         zaKym: data['zaKym'] ?? '',
-        time:
-        (data['createdAtClient'] as Timestamp?)?.toDate() ?? DateTime.now(),
+        time: (data['createdAtClient'] as Timestamp?)?.toDate() ??
+            DateTime.now(),
       );
 
       notifyListeners();
     });
+  }
+
+  // ================= HISTORY (FIRESTORE) =================
+
+  Future<void> loadHistoryFromFirestore() async {
+    final snapshot = await _db
+        .collection('requests')
+        .where('status', isEqualTo: 'approved')
+        .orderBy('approvedAt', descending: true)
+        .limit(50)
+        .get();
+
+    history.clear();
+
+    for (final doc in snapshot.docs) {
+      final data = doc.data();
+
+      history.add(
+        Visit(
+          meno: data['name'] ?? '',
+          auto: data['auto'] ?? '',
+          farba: data['farba'] ?? '',
+          spz: data['carPlate'] ?? '',
+          zaKym: data['zaKym'] ?? '',
+          time: (data['approvedAt'] as Timestamp?)?.toDate() ??
+              DateTime.now(),
+        ),
+      );
+    }
+
+    notifyListeners();
   }
 
   // ================= APPROVE =================
@@ -177,9 +251,7 @@ class VisitController extends ChangeNotifier {
       'approvedAt': FieldValue.serverTimestamp(),
     });
 
-    if (activeVisit != null) {
-      history.insert(0, activeVisit!);
-    }
+    await loadHistoryFromFirestore();
 
     activeVisit = null;
     activeVisitId = null;
