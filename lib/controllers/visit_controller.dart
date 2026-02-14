@@ -2,15 +2,15 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:audioplayers/audioplayers.dart';
 import '../models/visit.dart';
 
 class VisitController extends ChangeNotifier {
   final FirebaseFirestore _db = FirebaseFirestore.instance;
+  final AudioPlayer _audioPlayer = AudioPlayer();
 
   StreamSubscription<QuerySnapshot>? _masterSubscription;
   StreamSubscription<DocumentSnapshot>? _guestSubscription;
-
-  // ================= GUEST DATA =================
 
   String meno = '';
   String auto = '';
@@ -20,14 +20,11 @@ class VisitController extends ChangeNotifier {
 
   bool _guestLoaded = false;
 
-  // ================= STATE =================
-
   Visit? activeVisit;
   String? activeVisitId;
+  String? _lastNotifiedRequestId;
 
   final List<Visit> history = [];
-
-  // ================= INIT =================
 
   VisitController() {
     _init();
@@ -37,6 +34,18 @@ class VisitController extends ChangeNotifier {
     await _loadGuestFromStorage();
     await loadHistoryFromFirestore();
     _listenForRequests();
+  }
+
+  // ================= SOUND ONLY =================
+
+  Future<void> _playRequestSound() async {
+    try {
+      await _audioPlayer.stop();
+      await _audioPlayer.play(
+        AssetSource('sounds/deep_pip_04s.mp3'),
+        volume: 1.0,
+      );
+    } catch (_) {}
   }
 
   // ================= LOCAL STORAGE =================
@@ -95,7 +104,7 @@ class VisitController extends ChangeNotifier {
   Future<void> openRamp() async {
     if (!canOpenRamp) return;
 
-    final doc = await _db.collection('requests').add({
+    await _db.collection('requests').add({
       'name': meno,
       'auto': auto,
       'farba': farba,
@@ -104,72 +113,6 @@ class VisitController extends ChangeNotifier {
       'status': 'pending',
       'createdAtClient': Timestamp.now(),
       'createdAt': FieldValue.serverTimestamp(),
-    });
-
-    activeVisitId = doc.id;
-    activeVisit = Visit(
-      meno: meno,
-      auto: auto,
-      farba: farba,
-      spz: spz,
-      zaKym: zaKym,
-      time: DateTime.now(),
-    );
-
-    _listenForOwnRequest();
-    _startTimeout();
-    notifyListeners();
-  }
-
-  // ================= TIMEOUT =================
-
-  void _startTimeout() {
-    Future.delayed(const Duration(minutes: 1), () async {
-      if (activeVisitId == null) return;
-
-      final doc = await _db.collection('requests').doc(activeVisitId).get();
-      if (!doc.exists) return;
-
-      if (doc.data()?['status'] == 'pending') {
-        await _db.collection('requests').doc(activeVisitId).update({
-          'status': 'expired',
-          'expiredAt': FieldValue.serverTimestamp(),
-        });
-
-        activeVisit = null;
-        activeVisitId = null;
-        notifyListeners();
-      }
-    });
-  }
-
-  // ================= GUEST LISTENER =================
-
-  void _listenForOwnRequest() {
-    if (activeVisitId == null) return;
-
-    _guestSubscription?.cancel();
-    _guestSubscription = _db
-        .collection('requests')
-        .doc(activeVisitId)
-        .snapshots()
-        .listen((snapshot) {
-      if (!snapshot.exists) return;
-
-      final status = snapshot.data()?['status'];
-
-      if (status == 'approved' || status == 'expired') {
-        if (status == 'approved' && activeVisit != null) {
-          history.insert(0, activeVisit!);
-        }
-
-        activeVisit = null;
-        activeVisitId = null;
-
-        _guestSubscription?.cancel();
-        _guestSubscription = null;
-        notifyListeners();
-      }
     });
   }
 
@@ -184,7 +127,7 @@ class VisitController extends ChangeNotifier {
         .orderBy('createdAtClient')
         .limit(1)
         .snapshots()
-        .listen((snapshot) {
+        .listen((snapshot) async {
       if (snapshot.docs.isEmpty) {
         activeVisit = null;
         activeVisitId = null;
@@ -202,22 +145,26 @@ class VisitController extends ChangeNotifier {
         farba: data['farba'] ?? '',
         spz: data['carPlate'] ?? '',
         zaKym: data['zaKym'] ?? '',
-        time: (data['createdAtClient'] as Timestamp?)?.toDate() ??
-            DateTime.now(),
+        time: DateTime.now(),
       );
+
+      if (_lastNotifiedRequestId != doc.id) {
+        _lastNotifiedRequestId = doc.id;
+        await _playRequestSound();
+      }
 
       notifyListeners();
     });
   }
 
-  // ================= HISTORY (FIRESTORE) =================
+  // ================= HISTORY =================
 
   Future<void> loadHistoryFromFirestore() async {
     final snapshot = await _db
         .collection('requests')
         .where('status', isEqualTo: 'approved')
         .orderBy('approvedAt', descending: true)
-        .limit(50)
+        .limit(100)
         .get();
 
     history.clear();
@@ -241,8 +188,6 @@ class VisitController extends ChangeNotifier {
     notifyListeners();
   }
 
-  // ================= APPROVE =================
-
   Future<void> approveRequest() async {
     if (activeVisitId == null) return;
 
@@ -258,10 +203,9 @@ class VisitController extends ChangeNotifier {
     notifyListeners();
   }
 
-  // ================= CLEANUP =================
-
   @override
   void dispose() {
+    _audioPlayer.dispose();
     _masterSubscription?.cancel();
     _guestSubscription?.cancel();
     super.dispose();

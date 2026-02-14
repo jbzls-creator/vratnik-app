@@ -21,6 +21,12 @@ dependencies:
   # 🔥 LOCAL STORAGE (HOST DATA)
   shared_preferences: ^2.2.2
 
+  # 🔊 AUDIO (MASTER NOTIFICATION SOUND)
+  audioplayers: ^6.0.0
+
+  # 🔔 LOCAL NOTIFICATIONS (WAKE SCREEN)
+  flutter_local_notifications: ^17.2.1
+
   cupertino_icons: ^1.0.8
 
 dev_dependencies:
@@ -31,3 +37,6 @@ dev_dependencies:
 
 flutter:
   uses-material-design: true
+
+  assets:
+    - assets/sounds/deep_pip_04s.mp3

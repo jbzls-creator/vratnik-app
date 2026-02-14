@@ -17,53 +17,56 @@ class GuestScreen extends StatelessWidget {
     final bool canOpen =
         hasData && controller.activeVisit == null;
 
-    return Column(
-      children: [
-        // ================== HORNÁ POLOVICA ==================
-        Expanded(
-          flex: 1,
-          child: _tile(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                if (!hasData) _title('MOJE ÚDAJE'),
+    return SafeArea(
+      child: Column(
+        children: [
 
-                _value(controller.meno, 'Meno',
-                    size: 28, weight: FontWeight.w600),
-                _value(controller.auto, 'Auto',
-                    size: 26, weight: FontWeight.w500),
-                _value(controller.farba, 'Farba', size: 24),
-                _value(
-                  controller.spz,
-                  'SPZ',
-                  size: 26,
-                  spaced: true,
-                  weight: FontWeight.w600,
-                ),
-                _value(controller.zaKym, 'Za kým idem', size: 18),
+          // ================== HORNÁ ČASŤ (SCROLL) ==================
+          Expanded(
+            child: SingleChildScrollView(
+              padding: const EdgeInsets.all(16),
+              child: _tile(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    if (!hasData) _title('MOJE ÚDAJE'),
 
-                const Spacer(),
-
-                SizedBox(
-                  width: 160,
-                  height: 44,
-                  child: ElevatedButton(
-                    onPressed: () => _editGuestData(context, controller),
-                    child: const Text(
-                      'UPRAVIŤ',
-                      style: TextStyle(fontSize: 18),
+                    _value(controller.meno, 'Meno',
+                        size: 28, weight: FontWeight.w600),
+                    _value(controller.auto, 'Auto',
+                        size: 26, weight: FontWeight.w500),
+                    _value(controller.farba, 'Farba', size: 24),
+                    _value(
+                      controller.spz,
+                      'SPZ',
+                      size: 26,
+                      spaced: true,
+                      weight: FontWeight.w600,
                     ),
-                  ),
+                    _value(controller.zaKym, 'Za kým idem', size: 18),
+
+                    const SizedBox(height: 20),
+
+                    SizedBox(
+                      width: 160,
+                      height: 44,
+                      child: ElevatedButton(
+                        onPressed: () => _editGuestData(context, controller),
+                        child: const Text(
+                          'UPRAVIŤ',
+                          style: TextStyle(fontSize: 18),
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
-              ],
+              ),
             ),
           ),
-        ),
 
-        // ================== DOLNÁ POLOVICA ==================
-        Expanded(
-          flex: 1,
-          child: Center(
+          // ================== TLAČIDLO DOLE ==================
+          Padding(
+            padding: const EdgeInsets.only(bottom: 24),
             child: SizedBox(
               width: 340,
               height: 110,
@@ -88,8 +91,8 @@ class GuestScreen extends StatelessWidget {
               ),
             ),
           ),
-        ),
-      ],
+        ],
+      ),
     );
   }
 
@@ -165,7 +168,6 @@ class GuestScreen extends StatelessWidget {
   Widget _tile({required Widget child}) {
     return Container(
       width: double.infinity,
-      margin: const EdgeInsets.all(16),
       padding: const EdgeInsets.all(18),
       decoration: BoxDecoration(
         color: Colors.grey.shade800,

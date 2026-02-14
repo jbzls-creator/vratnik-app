@@ -20,11 +20,7 @@ class _HomeSwitcherState extends State<HomeSwitcher> {
   // ================== LOCK ==================
 
   void _onLockPressed() {
-    if (isMasterUI) {
-      setState(() => isMasterUI = false);
-    } else {
-      _showPinDialog();
-    }
+    _showPinDialog();
   }
 
   void _showPinDialog() {
@@ -51,7 +47,14 @@ class _HomeSwitcherState extends State<HomeSwitcher> {
               onPressed: () {
                 if (pinCtrl.text == masterPin) {
                   Navigator.of(context, rootNavigator: true).pop();
-                  setState(() => isMasterUI = true);
+                  setState(() => isMasterUI = !isMasterUI);
+                } else {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      content: Text("Nesprávny PIN"),
+                      backgroundColor: Colors.red,
+                    ),
+                  );
                 }
               },
               child: const Text('OK'),
@@ -66,7 +69,6 @@ class _HomeSwitcherState extends State<HomeSwitcher> {
 
   @override
   Widget build(BuildContext context) {
-    // controller tu zatiaľ len “držime nažive”
     context.watch<VisitController>();
 
     return Scaffold(

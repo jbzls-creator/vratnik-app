@@ -44,7 +44,6 @@ class _MasterScreenState extends State<MasterScreen> {
 
         const Divider(height: 1),
 
-        // ===== OBSAH =====
         Expanded(
           child: showHistory
               ? const HistoryScreen()
