@@ -1,0 +1,58 @@
+[debug] [2026-02-12T00:23:39.865Z] ----------------------------------------------------------------------
+[debug] [2026-02-12T00:23:39.869Z] Command:       C:\Program Files\nodejs\node.exe C:\Users\marek\AppData\Roaming\npm\node_modules\firebase-tools\lib\bin\firebase.js init hosting
+[debug] [2026-02-12T00:23:39.869Z] CLI Version:   15.5.1
+[debug] [2026-02-12T00:23:39.870Z] Platform:      win32
+[debug] [2026-02-12T00:23:39.870Z] Node Version:  v24.13.0
+[debug] [2026-02-12T00:23:39.870Z] Time:          Thu Feb 12 2026 01:23:39 GMT+0100 (stredoeurópsky štandardný čas)
+[debug] [2026-02-12T00:23:39.870Z] ----------------------------------------------------------------------
+[debug] 
+[debug] [2026-02-12T00:23:39.873Z] >>> [apiv2][query] GET https://firebase-public.firebaseio.com/cli.json [none]
+[debug] [2026-02-12T00:23:43.486Z] Object "" in "firebase.json" has unknown property: {"additionalProperty":"flutter"}
+[debug] [2026-02-12T00:23:43.493Z] Object "" in "firebase.json" has unknown property: {"additionalProperty":"flutter"}
+[info] 
+     ######## #### ########  ######## ########     ###     ######  ########
+     ##        ##  ##     ## ##       ##     ##  ##   ##  ##       ##
+     ######    ##  ########  ######   ########  #########  ######  ######
+     ##        ##  ##    ##  ##       ##     ## ##     ##       ## ##
+     ##       #### ##     ## ######## ########  ##     ##  ######  ########
+
+You're about to initialize a Firebase project in this directory:
+
+  C:\Users\marek\StudioProjects\vratnik_app
+
+Before we get started, keep in mind:
+
+  * You are initializing within an existing Firebase project directory
+
+[debug] [2026-02-12T00:23:43.947Z] <<< [apiv2][status] GET https://firebase-public.firebaseio.com/cli.json 200
+[debug] [2026-02-12T00:23:43.947Z] <<< [apiv2][body] GET https://firebase-public.firebaseio.com/cli.json {"cloudBuildErrorAfter":1594252800000,"cloudBuildWarnAfter":1590019200000,"defaultNode10After":1594252800000,"minVersion":"3.0.5","node8DeploysDisabledAfter":1613390400000,"node8RuntimeDisabledAfter":1615809600000,"node8WarnAfter":1600128000000}
+[info] 
+=== Project Setup
+[info] 
+[info] First, let's associate this project directory with a Firebase project.
+[info] You can create multiple project aliases by running firebase use --add, 
+[info] 
+[debug] [2026-02-12T00:25:34.886Z] > command requires scopes: ["email","openid","https://www.googleapis.com/auth/cloudplatformprojects.readonly","https://www.googleapis.com/auth/firebase","https://www.googleapis.com/auth/cloud-platform"]
+[debug] [2026-02-12T00:25:34.887Z] > authorizing via signed-in user (jbzls.k@gmail.com)
+[debug] [2026-02-12T00:25:34.887Z] Checked if tokens are valid: false, expires at: 1769818384066
+[debug] [2026-02-12T00:25:34.888Z] Checked if tokens are valid: false, expires at: 1769818384066
+[debug] [2026-02-12T00:25:34.888Z] > refreshing access token with scopes: []
+[debug] [2026-02-12T00:25:34.889Z] >>> [apiv2][query] POST https://www.googleapis.com/oauth2/v3/token [none]
+[debug] [2026-02-12T00:25:34.889Z] >>> [apiv2][body] POST https://www.googleapis.com/oauth2/v3/token [omitted]
+[debug] [2026-02-12T00:25:35.222Z] <<< [apiv2][status] POST https://www.googleapis.com/oauth2/v3/token 200
+[debug] [2026-02-12T00:25:35.222Z] <<< [apiv2][body] POST https://www.googleapis.com/oauth2/v3/token [omitted]
+[debug] [2026-02-12T00:25:35.231Z] >>> [apiv2][query] GET https://firebase.googleapis.com/v1beta1/projects pageSize=100
+[debug] [2026-02-12T00:25:36.005Z] <<< [apiv2][status] GET https://firebase.googleapis.com/v1beta1/projects 200
+[debug] [2026-02-12T00:25:36.006Z] <<< [apiv2][body] GET https://firebase.googleapis.com/v1beta1/projects [omitted]
+[info] 
+=== Hosting Setup
+[debug] [2026-02-12T00:25:44.816Z] Checked if tokens are valid: true, expires at: 1770859534222
+[debug] [2026-02-12T00:25:44.816Z] Checked if tokens are valid: true, expires at: 1770859534222
+[debug] [2026-02-12T00:25:44.816Z] >>> [apiv2][query] GET https://firebase.googleapis.com/v1beta1/projects/vratnik-app [none]
+[debug] [2026-02-12T00:25:45.348Z] <<< [apiv2][status] GET https://firebase.googleapis.com/v1beta1/projects/vratnik-app 200
+[debug] [2026-02-12T00:25:45.348Z] <<< [apiv2][body] GET https://firebase.googleapis.com/v1beta1/projects/vratnik-app {"projectId":"vratnik-app","projectNumber":"413497240466","displayName":"vratnik-app","name":"projects/vratnik-app","resources":{"hostingSite":"vratnik-app"},"state":"ACTIVE","etag":"1_5a412852-2761-4c52-b523-b8dc78c1d378"}
+[info] 
+[info] Your public directory is the folder (relative to your project directory) that
+[info] will contain Hosting assets to be uploaded with firebase deploy. If you
+[info] have a build process for your assets, use your build's output directory.
+[info] 

@@ -1,3 +1,4 @@
+import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../controllers/visit_controller.dart';
@@ -20,44 +21,68 @@ class HistoryScreen extends StatelessWidget {
     }
 
     return ListView.builder(
-      padding: const EdgeInsets.all(12),
+      padding: const EdgeInsets.all(16),
       itemCount: history.length,
       itemBuilder: (_, i) {
         final Visit v = history[i];
 
-        return Card(
-          color: Colors.grey.shade800,
-          margin: const EdgeInsets.only(bottom: 12),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(16),
-          ),
-          child: Padding(
-            padding: const EdgeInsets.all(14),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  v.meno,
-                  style: const TextStyle(
-                    fontSize: 22,
-                    fontWeight: FontWeight.bold,
+        return Container(
+          margin: const EdgeInsets.only(bottom: 16),
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(28),
+            child: BackdropFilter(
+              filter: ImageFilter.blur(sigmaX: 18, sigmaY: 18),
+              child: Container(
+                padding: const EdgeInsets.all(20),
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(28),
+                  color: Colors.white.withOpacity(0.06),
+                  border: Border.all(
+                    color: Colors.white.withOpacity(0.15),
+                    width: 1,
                   ),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.6),
+                      blurRadius: 25,
+                      offset: const Offset(0, 15),
+                    ),
+                  ],
                 ),
-                const SizedBox(height: 4),
-                Text('${v.auto} • ${v.spz}',
-                    style: const TextStyle(fontSize: 18)),
-                if (v.zaKym.isNotEmpty)
-                  Text('Za kým: ${v.zaKym}',
-                      style: const TextStyle(fontSize: 16)),
-                const SizedBox(height: 8),
-                Text(
-                  _formatDate(v.time),
-                  style: const TextStyle(
-                    fontSize: 14,
-                    color: Colors.white54,
-                  ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      v.meno,
+                      style: const TextStyle(
+                        fontSize: 22,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    const SizedBox(height: 6),
+                    Text(
+                      '${v.auto} • ${v.spz}',
+                      style: const TextStyle(fontSize: 18),
+                    ),
+                    if (v.zaKym.isNotEmpty)
+                      Padding(
+                        padding: const EdgeInsets.only(top: 4),
+                        child: Text(
+                          'Za kým: ${v.zaKym}',
+                          style: const TextStyle(fontSize: 16),
+                        ),
+                      ),
+                    const SizedBox(height: 10),
+                    Text(
+                      _formatDate(v.time),
+                      style: const TextStyle(
+                        fontSize: 14,
+                        color: Colors.white54,
+                      ),
+                    ),
+                  ],
                 ),
-              ],
+              ),
             ),
           ),
         );
